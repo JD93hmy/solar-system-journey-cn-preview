@@ -51,6 +51,8 @@ function PlanetCard({ world, index, onOpen }) {
 }
 
 function LearningCard({ world, onClose, onMove }) {
+  const [flipped, setFlipped] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   useEffect(() => {
     const closeOnEscape = (event) => { if (event.key === "Escape") onClose(); };
     window.addEventListener("keydown", closeOnEscape);
@@ -61,8 +63,23 @@ function LearningCard({ world, onClose, onMove }) {
     <div className="learning-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className={`learning-card learn-${world.id}`} role="dialog" aria-modal="true" aria-labelledby="learning-title">
         <div className="learning-art">
-          <CardArtwork world={world} className="learning-artwork" />
-          <span>{world.number} / 09</span>
+          <button
+            className={`learning-card-preview${flipped ? " is-flipped" : ""}`}
+            style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg` }}
+            onClick={() => setFlipped((value) => !value)}
+            onPointerMove={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect();
+              setTilt({ x: ((event.clientY - rect.top) / rect.height - 0.5) * -12, y: ((event.clientX - rect.left) / rect.width - 0.5) * 14 });
+            }}
+            onPointerLeave={() => setTilt({ x: 0, y: 0 })}
+            aria-label={flipped ? "翻回卡牌正面" : "翻转卡牌查看背面"}
+          >
+            <span className="learning-card-3d-inner">
+              <span className="learning-card-face learning-card-front"><CardArtwork world={world} className="learning-artwork" /></span>
+              <span className="learning-card-face learning-card-back"><img src="/assets/cards/saturn-card-back.png" alt="" /><span>SOLAR ATLAS · {world.number}</span><b>太阳系星图</b></span>
+            </span>
+          </button>
+          <span className="learning-art-count">{world.number} / 09</span>
         </div>
         <div className="learning-copy">
           <button className="close-learning" onClick={onClose} aria-label="关闭知识卡"><X size={20} /></button>
