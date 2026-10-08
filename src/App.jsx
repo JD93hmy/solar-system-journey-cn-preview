@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowRight, Circle, Clock, Planet, Thermometer } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "@phosphor-icons/react";
 
 const worlds = [
   ["sun", "太阳", "SUN", "恒星", "太阳系中心", "1,392,700 公里", "约 25–35 个地球日", "约 5,500°C", "约 73% 氢、25% 氦", "光到地球约 8 分 20 秒", "太阳集中了太阳系约 99.8% 的质量。它释放的光与热塑造了每颗行星的环境，也维系着地球上的生命。", "太阳每秒把约 6 亿吨氢聚变成氦。", "https://science.nasa.gov/sun/facts/"],
@@ -11,68 +11,103 @@ const worlds = [
   ["saturn", "土星", "SATURN", "第六颗行星", "14 亿公里", "120,536 公里", "29.45 个地球年", "云顶约 −140°C", "氢、氦与冰尘组成的环", "拥有最壮观复杂的行星环", "土星的环由无数冰粒、岩石与尘埃组成。它本身密度极低，若有足够大的海洋，理论上甚至可以漂浮。", "土星北极有一条巨大的六边形急流。", "https://science.nasa.gov/saturn/facts/"],
   ["uranus", "天王星", "URANUS", "第七颗行星", "29 亿公里", "51,118 公里", "84 个地球年", "约 −195°C", "水、甲烷与氨构成的冰巨星", "几乎横躺着绕太阳运行", "天王星淡青色来自大气中的甲烷。一次远古碰撞可能让它的自转轴倾斜到近乎躺倒。", "它的一个季节可持续约 21 个地球年。", "https://science.nasa.gov/uranus/facts/"],
   ["neptune", "海王星", "NEPTUNE", "第八颗行星", "45 亿公里", "49,528 公里", "164.8 个地球年", "约 −200°C", "富含水、甲烷与氨的冰巨星", "太阳系风速最快的世界", "在太阳系已知行星的最外侧，海王星依然拥有活跃而猛烈的天气。深蓝云层中，风速可超过每小时 2,000 公里。", "自 1846 年被发现后，海王星只完成过一次公转。", "https://science.nasa.gov/neptune/facts/"],
-].map(([id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source]) => ({ id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source, image: `/assets/planets/${id}.png` }));
+].map(([id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source], index) => ({ id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source, image: `/assets/planets/${id}.png`, number: String(index + 1).padStart(2, "0") }));
 
-function FactRow({ icon: Icon, label, value }) {
-  return <div className="fact-row"><Icon aria-hidden="true" weight="light" /><span>{label}</span><strong>{value}</strong></div>;
+const facts = [
+  ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
+];
+
+function PlanetCard({ world, index, onOpen }) {
+  return (
+    <button
+      className={`planet-card planet-${world.id}`}
+      style={{ "--card-index": index, "--fan-angle": `${(index - 4) * 4}deg`, "--fan-lift": `${Math.abs(index - 4) * 13}px` }}
+      onClick={() => onOpen(world)}
+      aria-label={`翻开${world.name}卡牌，查看知识`}
+    >
+      <span className="card-inner">
+        <span className="card-face card-back" aria-hidden="true">
+          <img src="/assets/cards/saturn-card-back.png" alt="" />
+          <span className="back-index">SOLAR ATLAS · {world.number}</span>
+          <span className="back-caption">太阳系星图</span>
+        </span>
+        <span className="card-face card-front" aria-hidden="true">
+          {world.id === "saturn" ? <img className="saturn-card-art" src="/assets/cards/saturn-card-front.png" alt="" /> : <>
+            <span className="front-sky" />
+            <span className="orbit-engraving" />
+            <span className="planet-layer"><img src={world.image} alt="" /></span>
+            <span className="light-layer" />
+            <span className="border-layer"><i /><i /><i /><i /></span>
+            <span className="description-layer"><small>{world.order} · SOLAR SYSTEM</small><b>{world.english}</b><em>{world.name}</em></span>
+          </>}
+          <span className="foil-sheen" />
+        </span>
+      </span>
+    </button>
+  );
 }
 
-function WorldSection({ world, index }) {
-  const next = worlds[index + 1];
+function LearningCard({ world, onClose, onMove }) {
+  useEffect(() => {
+    const closeOnEscape = (event) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
+
   return (
-    <section className={`world-section world-${world.id}`} id={world.id} data-world={world.id}>
-      <div className="world-copy">
-        <p className="eyebrow">{world.order} · {world.english}</p>
-        <h1>{index === 0 ? <>从太阳出发，<br />穿越八颗行星</> : world.name}</h1>
-        <p className="intro">{world.intro}</p>
-        {index === 0 && <button className="primary-action" onClick={() => document.querySelector("#mercury")?.scrollIntoView({ behavior: "smooth" })}>开始太阳系之旅 <ArrowRight weight="light" /></button>}
-        <div className="facts" aria-label={`${world.name}关键数据`}>
-          <FactRow icon={Planet} label="距太阳" value={world.distance} />
-          <FactRow icon={Circle} label="直径" value={world.diameter} />
-          <FactRow icon={Clock} label={world.id === "sun" ? "自转" : "公转周期"} value={world.year} />
-          <FactRow icon={Thermometer} label="温度" value={world.temperature} />
+    <div className="learning-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className={`learning-card learn-${world.id}`} role="dialog" aria-modal="true" aria-labelledby="learning-title">
+        <div className="learning-art">
+          <img src={world.id === "saturn" ? "/assets/cards/saturn-card-front.png" : world.image} alt={`${world.name}天体图像`} />
+          <span>{world.number} / 09</span>
         </div>
-        <div className="memory-fact"><span>值得记住</span><p>{world.fact}</p></div>
-        <a className="source-link" href={world.source} target="_blank" rel="noreferrer">查看 NASA 科学资料 <ArrowRight weight="light" /></a>
-      </div>
-      <div className="world-stage" aria-label={`${world.name}天体图像`}>
-        <img src={world.image} alt={`${world.name}真实质感天体图像`} />
-        <div className="stage-caption"><span>{world.composition}</span><strong>{world.light}</strong></div>
-        <div className="distance-scale" aria-label="与太阳的距离示意"><span>与太阳的距离</span><div className="scale-line"><i style={{ width: `${Math.max(4, ((index + 1) / worlds.length) * 100)}%` }} /></div><b>{world.distance}</b></div>
-      </div>
-      {next && <button className="next-world" onClick={() => document.querySelector(`#${next.id}`)?.scrollIntoView({ behavior: "smooth" })}><span>下一站</span><strong>{next.name}</strong><ArrowDown weight="light" /></button>}
-    </section>
+        <div className="learning-copy">
+          <button className="close-learning" onClick={onClose} aria-label="关闭知识卡"><X size={20} /></button>
+          <p className="eyebrow">{world.order} <span>·</span> {world.english}</p>
+          <h2 id="learning-title">{world.name}</h2>
+          <p className="learning-intro">{world.intro}</p>
+          <div className="learning-facts">{facts.map(([label, key]) => <div key={key}><span>{label}</span><b>{world[key]}</b></div>)}</div>
+          <blockquote><span>值得记住</span><p>{world.fact}</p></blockquote>
+          <p className="composition-note">{world.composition} <span>·</span> {world.light}</p>
+          <a className="source-link" href={world.source} target="_blank" rel="noreferrer">NASA 科学资料 <ArrowUpRight size={15} /></a>
+          <div className="learn-controls">
+            <button onClick={() => onMove(-1)} aria-label="上一张"><ArrowLeft size={18} /> 上一张</button>
+            <button onClick={() => onMove(1)} aria-label="下一张">下一张 <ArrowRight size={18} /></button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 
 export function App() {
-  const [active, setActive] = useState("sun");
-  const [progress, setProgress] = useState(0);
-  const activeIndex = useMemo(() => worlds.findIndex((world) => world.id === active), [active]);
-  const observerRef = useRef(null);
+  const [selected, setSelected] = useState(null);
+  const currentIndex = useMemo(() => selected ? worlds.findIndex((world) => world.id === selected.id) : -1, [selected]);
+  const moveCard = (step) => setSelected(worlds[(currentIndex + step + worlds.length) % worlds.length]);
 
-  useEffect(() => {
-    const sections = [...document.querySelectorAll("[data-world]")];
-    observerRef.current = new IntersectionObserver((entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible) setActive(visible.target.dataset.world);
-    }, { threshold: [0.35, 0.55, 0.75] });
-    sections.forEach((section) => observerRef.current.observe(section));
-    const onScroll = () => { const max = document.documentElement.scrollHeight - window.innerHeight; setProgress(max > 0 ? window.scrollY / max : 0); };
-    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { observerRef.current?.disconnect(); window.removeEventListener("scroll", onScroll); };
-  }, []);
-
-  const jumpTo = (id) => document.querySelector(`#${id}`)?.scrollIntoView({ behavior: "smooth" });
   return (
-    <div className="app-shell">
-      <aside className="journey-rail" aria-label="太阳系旅程导航">
-        <button className="brand" onClick={() => jumpTo("sun")}>太阳系</button>
-        <div className="rail-progress" aria-hidden="true"><i style={{ height: `${progress * 100}%` }} /></div>
-        <nav>{worlds.map((world) => <button key={world.id} className={active === world.id ? "active" : ""} onClick={() => jumpTo(world.id)} aria-current={active === world.id ? "step" : undefined}><img src={world.image} alt="" /><span>{world.name}</span></button>)}</nav>
-        <div className="rail-count"><b>{String(activeIndex + 1).padStart(2, "0")}</b><span>/ 09</span></div>
-      </aside>
-      <main>{worlds.map((world, index) => <WorldSection key={world.id} world={world} index={index} />)}</main>
-    </div>
+    <main className="atlas-shell">
+      <header className="atlas-header">
+        <a className="atlas-wordmark" href="#top" aria-label="太阳系星图首页"><span className="wordmark-sun">✳</span> SOLAR ATLAS</a>
+        <p>一场穿越八颗行星的收藏之旅</p>
+        <span className="header-edition">FIELD GUIDE <i>·</i> 2026</span>
+      </header>
+      <section className="deck-scene" id="top" aria-labelledby="hero-title">
+        <div className="scene-orbit orbit-one" /><div className="scene-orbit orbit-two" />
+        <div className="scene-star star-a">✦</div><div className="scene-star star-b">✧</div><div className="scene-star star-c">✦</div>
+        <div className="hero-copy">
+          <p className="hero-kicker"><span /> THE CELESTIAL COLLECTION <span /></p>
+          <h1 id="hero-title">把太阳系，<br /><em>收藏在手中。</em></h1>
+          <p>悬停翻看卡牌，点击开启一段星际探索。</p>
+        </div>
+        <div className="card-fan" role="group" aria-label="太阳与八颗行星卡牌">
+          {worlds.map((world, index) => <PlanetCard key={world.id} world={world} index={index} onOpen={setSelected} />)}
+        </div>
+        <div className="deck-hint"><span className="hint-line" /> HOVER TO REVEAL <span className="hint-key">↗</span></div>
+        <div className="deck-count"><b>09</b><span> CELESTIAL BODIES</span></div>
+      </section>
+      <footer className="atlas-footer"><span>从太阳开始，依次认识每个世界</span><span>探索太阳系 <i>·</i> NASA FACTS</span></footer>
+      {selected && <LearningCard world={selected} onClose={() => setSelected(null)} onMove={moveCard} />}
+    </main>
   );
 }
