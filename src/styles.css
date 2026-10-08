@@ -39,23 +39,26 @@ button,a { font:inherit; } button { color:inherit; }
 .back-index,.back-caption { position:absolute; z-index:2; left:0; right:0; text-align:center; color:#e1c994; text-shadow:0 1px 8px #020406; font:10px Georgia,serif; letter-spacing:.2em; }
 .back-index { top:15px; }.back-caption { bottom:18px; font-family:"Noto Serif SC",serif; font-size:11px; letter-spacing:.3em; }
 .card-front { transform:rotateY(180deg); background:#071018; border-color:rgba(238,211,158,.88); }
-.front-sky { position:absolute; inset:0; background:radial-gradient(ellipse at 48% 42%,rgba(32,74,92,.58),transparent 46%),radial-gradient(circle at 20% 20%,rgba(245,196,108,.21),transparent 23%),linear-gradient(150deg,#080c12,#0e1a22 55%,#070b10); }
-.front-sky::before { content:"✦     ·   ✧      ·     ✦"; position:absolute; inset:14% 8%; color:rgba(223,203,162,.62); font-size:10px; letter-spacing:.7em; }
-.orbit-engraving { position:absolute; width:115%; height:52%; top:23%; left:-8%; border:1px solid rgba(218,182,118,.48); border-radius:50%; transform:rotate(-28deg); box-shadow:0 0 0 9px rgba(190,163,114,.08),0 0 0 22px rgba(190,163,114,.06); }
-.planet-layer { position:absolute; display:grid; place-items:center; inset:12% 6% 23%; }
-.planet-layer img { width:94%; height:90%; object-fit:contain; filter:drop-shadow(0 6px 18px rgba(244,179,80,.32)); }
-.planet-sun .planet-layer img { filter:drop-shadow(0 0 25px rgba(255,184,73,.65)); }
-.light-layer { position:absolute; inset:0; pointer-events:none; background:linear-gradient(112deg,transparent 32%,rgba(102,213,242,.14) 48%,rgba(240,212,155,.14) 52%,transparent 68%); mix-blend-mode:screen; }
-.border-layer { position:absolute; inset:8px; border:1px solid rgba(223,188,121,.65); border-radius:7px; pointer-events:none; }
-.border-layer i { position:absolute; width:17px; height:17px; border:1px solid rgba(224,190,127,.72); transform:rotate(45deg); }
-.border-layer i:nth-child(1) { top:5px; left:5px; }.border-layer i:nth-child(2) { top:5px; right:5px; }.border-layer i:nth-child(3) { bottom:5px; left:5px; }.border-layer i:nth-child(4) { bottom:5px; right:5px; }
-.description-layer { position:absolute; inset:auto 0 0; height:26%; padding:12px 9px 13px; display:grid; place-content:center; text-align:center; background:linear-gradient(180deg,transparent,rgba(3,7,10,.94) 20%); color:#ead8b3; }
+.card-artwork { position:absolute; inset:0; display:block; overflow:hidden; background:#070d14; }
+.art-background { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 40%,rgba(29,47,56,.76),transparent 55%),linear-gradient(145deg,#0a0e13,#0b1820 54%,#05090d); }
+.art-background::after { content:""; position:absolute; inset:0; background:radial-gradient(circle at 18% 18%,rgba(241,193,119,.6) 0 1px,transparent 2px),radial-gradient(circle at 76% 26%,rgba(225,211,182,.68) 0 1px,transparent 2px),radial-gradient(circle at 21% 72%,rgba(117,190,211,.7) 0 1px,transparent 2px),radial-gradient(circle at 84% 68%,rgba(241,193,119,.5) 0 1px,transparent 2px); opacity:.82; }
+.art-star-map { position:absolute; z-index:1; inset:11% 6% 27%; border:1px solid rgba(211,178,115,.32); border-radius:50%; transform:rotate(-19deg); box-shadow:0 0 0 7px rgba(190,163,114,.045),0 0 0 18px rgba(190,163,114,.04); }
+.art-star-map::after { content:""; position:absolute; inset:9%; border:1px solid rgba(211,178,115,.17); border-radius:50%; }
+.planet-layer { position:absolute; z-index:2; display:grid; place-items:center; inset:12% -4% 25%; }
+.planet-layer img { width:108%; height:100%; object-fit:contain; mix-blend-mode:screen; filter:drop-shadow(0 6px 18px rgba(244,179,80,.35)); }
+.planet-earth .planet-layer img,.planet-uranus .planet-layer img,.planet-neptune .planet-layer img { filter:drop-shadow(0 0 18px rgba(83,190,230,.42)); }
+.planet-sun .planet-layer img { filter:drop-shadow(0 0 25px rgba(255,184,73,.72)); }
+.light-layer { position:absolute; z-index:3; inset:-2%; pointer-events:none; mix-blend-mode:screen; }
+.light-layer img { width:100%; height:100%; object-fit:cover; opacity:.56; }
+.border-layer { position:absolute; z-index:6; inset:0; pointer-events:none; mix-blend-mode:screen; }
+.border-layer img { display:block; width:100%; height:100%; object-fit:fill; }
+.description-layer { position:absolute; z-index:5; inset:auto 0 0; height:25%; padding:12px 9px 14px; display:grid; place-content:center; text-align:center; color:#ead8b3; background:linear-gradient(180deg,rgba(3,7,10,.04),rgba(3,7,10,.58) 22%,rgba(3,7,10,.84)); }
 .description-layer small { color:#a9946c; font:9px Georgia,serif; letter-spacing:.16em; }
 .description-layer b { margin-top:4px; font:500 clamp(14px,1.25vw,18px) Georgia,serif; letter-spacing:.12em; }
 .description-layer em { margin-top:2px; color:#d3c4a6; font:12px "Noto Serif SC",serif; font-style:normal; }
-.foil-sheen { position:absolute; z-index:4; inset:-20%; opacity:0; background:linear-gradient(110deg,transparent 38%,rgba(111,222,240,.12) 45%,rgba(249,230,190,.34) 50%,rgba(137,219,238,.11) 55%,transparent 62%); transform:translateX(-65%); transition:opacity 500ms ease,transform 800ms ease; mix-blend-mode:screen; pointer-events:none; }
+.foil-sheen { position:absolute; z-index:7; inset:-20%; opacity:0; background:linear-gradient(110deg,transparent 38%,rgba(111,222,240,.12) 45%,rgba(249,230,190,.34) 50%,rgba(137,219,238,.11) 55%,transparent 62%); transform:translateX(-65%); transition:opacity 500ms ease,transform 800ms ease; mix-blend-mode:screen; pointer-events:none; }
 .planet-card:hover .foil-sheen,.planet-card:focus-visible .foil-sheen { opacity:1; transform:translateX(40%); }
-.saturn-card-art { display:block; width:100%; height:100%; object-fit:cover; }
+.learning-artwork { position:relative; inset:auto; flex:none; width:auto; max-width:80%; height:min(90%,448px); aspect-ratio:2/3; box-shadow:0 12px 35px rgba(0,0,0,.55); }
 .deck-hint { margin-top:17px; position:relative; z-index:2; display:flex; align-items:center; gap:12px; color:#858783; font:11px Georgia,serif; letter-spacing:.2em; }
 .hint-line { width:32px; height:1px; background:#92764b; }.hint-key { color:#c7a568; font-size:16px; }
 .deck-count { position:absolute; right:clamp(24px,6vw,92px); bottom:24px; display:grid; justify-items:end; color:#7e8282; font:10px Georgia,serif; letter-spacing:.17em; }

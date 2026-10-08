@@ -17,6 +17,19 @@ const facts = [
   ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
 ];
 
+function CardArtwork({ world, className = "" }) {
+  return (
+    <span className={`card-artwork ${className} card-art-${world.id}`} aria-hidden="true">
+      <span className="art-background" />
+      <span className="art-star-map" />
+      <span className="planet-layer"><img src={world.image} alt="" /></span>
+      <span className="light-layer"><img src="/assets/cards/card-light-overlay.png" alt="" /></span>
+      <span className="description-layer"><small>{world.order} <i>·</i> SOLAR SYSTEM</small><b>{world.english}</b><em>{world.name}</em></span>
+      <span className="border-layer"><img src="/assets/cards/card-ornamental-frame.png" alt="" /></span>
+    </span>
+  );
+}
+
 function PlanetCard({ world, index, onOpen }) {
   return (
     <button
@@ -31,17 +44,7 @@ function PlanetCard({ world, index, onOpen }) {
           <span className="back-index">SOLAR ATLAS · {world.number}</span>
           <span className="back-caption">太阳系星图</span>
         </span>
-        <span className="card-face card-front" aria-hidden="true">
-          {world.id === "saturn" ? <img className="saturn-card-art" src="/assets/cards/saturn-card-front.png" alt="" /> : <>
-            <span className="front-sky" />
-            <span className="orbit-engraving" />
-            <span className="planet-layer"><img src={world.image} alt="" /></span>
-            <span className="light-layer" />
-            <span className="border-layer"><i /><i /><i /><i /></span>
-            <span className="description-layer"><small>{world.order} · SOLAR SYSTEM</small><b>{world.english}</b><em>{world.name}</em></span>
-          </>}
-          <span className="foil-sheen" />
-        </span>
+        <span className="card-face card-front"><CardArtwork world={world} /><span className="foil-sheen" /></span>
       </span>
     </button>
   );
@@ -58,7 +61,7 @@ function LearningCard({ world, onClose, onMove }) {
     <div className="learning-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className={`learning-card learn-${world.id}`} role="dialog" aria-modal="true" aria-labelledby="learning-title">
         <div className="learning-art">
-          <img src={world.id === "saturn" ? "/assets/cards/saturn-card-front.png" : world.image} alt={`${world.name}天体图像`} />
+          <CardArtwork world={world} className="learning-artwork" />
           <span>{world.number} / 09</span>
         </div>
         <div className="learning-copy">
