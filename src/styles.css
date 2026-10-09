@@ -39,25 +39,15 @@ button,a { font:inherit; } button { color:inherit; }
 .back-index,.back-caption { position:absolute; z-index:2; left:0; right:0; text-align:center; color:#e1c994; text-shadow:0 1px 8px #020406; font:10px Georgia,serif; letter-spacing:.2em; }
 .back-index { top:15px; }.back-caption { bottom:18px; font-family:"Noto Serif SC",serif; font-size:11px; letter-spacing:.3em; }
 .card-front { transform:rotateY(180deg); background:#071018; border-color:rgba(238,211,158,.88); }
-.card-artwork { --planet-scale:1; position:absolute; inset:0; display:block; overflow:hidden; isolation:isolate; background:#06090d; }
-.card-atmosphere { position:absolute; inset:0; z-index:0; background:radial-gradient(ellipse at 48% 40%,rgba(112,69,35,.5),transparent 41%),radial-gradient(ellipse at 68% 49%,rgba(27,88,110,.3),transparent 55%),radial-gradient(circle at 50% 52%,#0b1015 0%,#05080c 65%,#030507 100%); }
-.card-atmosphere::after { content:""; position:absolute; inset:0; opacity:.34; background:radial-gradient(1px 1px at 19% 24%,#f0d29b 99%,transparent),radial-gradient(1px 1px at 81% 30%,#d8efff 99%,transparent),radial-gradient(1.5px 1.5px at 70% 62%,#efd19a 99%,transparent),radial-gradient(1px 1px at 28% 69%,#eff4f1 99%,transparent),radial-gradient(1px 1px at 56% 18%,#c7dff0 99%,transparent); }
-.card-planet-layer { position:absolute; z-index:1; top:12%; left:-8%; display:block; width:116%; height:73%; object-fit:contain; transform:scale(var(--planet-scale)); mix-blend-mode:screen; filter:drop-shadow(0 18px 25px rgba(0,0,0,.32)); }
-.planet-layer-sun { --planet-scale:1.03; filter:drop-shadow(0 0 24px rgba(245,174,78,.48)); }
-.planet-layer-mercury,.planet-layer-mars { --planet-scale:.86; }
-.planet-layer-earth { --planet-scale:.93; }
-.planet-layer-venus { --planet-scale:.9; }
-.planet-layer-jupiter { --planet-scale:.9; }
-.planet-layer-saturn { --planet-scale:.93; }
-.planet-layer-uranus,.planet-layer-neptune { --planet-scale:.88; }
-.card-light-layer { position:absolute; z-index:2; inset:-3% -3%; display:block; width:106%; height:106%; object-fit:fill; mix-blend-mode:screen; opacity:.68; pointer-events:none; }
-.description-layer { position:absolute; z-index:4; left:15%; right:15%; bottom:5.3%; height:12%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#efd18f; pointer-events:none; text-shadow:0 2px 10px #080703,0 0 17px rgba(228,166,78,.36); }
-.description-layer b { font:500 clamp(12px,1.4vw,22px) Georgia,serif; letter-spacing:.18em; }
-.description-layer em { margin-top:2px; color:#f0dfba; font:500 clamp(10px,1vw,15px) "Noto Serif SC",serif; font-style:normal; letter-spacing:.14em; }
-.description-layer small { margin-top:3px; color:#c7a568; font:clamp(6px,.62vw,9px) Georgia,serif; letter-spacing:.16em; }
+.card-artwork { position:absolute; inset:0; display:block; overflow:hidden; isolation:isolate; background:#05080c; }
+.card-composite-image { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center; transform:scale(1.005); transition:transform 900ms cubic-bezier(.2,.7,.2,1),filter 500ms ease; }
+.planet-card:hover .card-composite-image,.learning-card-preview:hover .card-composite-image { transform:scale(1.035); filter:saturate(1.08) brightness(1.04); }
+.description-layer { position:absolute; z-index:2; left:13%; right:13%; bottom:7.5%; height:11%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#efd18f; pointer-events:none; text-shadow:0 2px 8px #020508,0 0 14px rgba(228,166,78,.36); }
+.description-layer b { font:500 clamp(12px,1.28vw,20px) Georgia,serif; letter-spacing:.18em; }
+.description-layer em { margin-top:2px; color:#f0dfba; font:500 clamp(10px,.95vw,14px) "Noto Serif SC",serif; font-style:normal; letter-spacing:.14em; }
+.description-layer small { margin-top:3px; color:#c7a568; font:clamp(6px,.6vw,9px) Georgia,serif; letter-spacing:.13em; }
 .description-layer i { font-style:normal; margin:0 3px; }
-.card-frame-layer { position:absolute; z-index:5; inset:0; display:block; width:100%; height:100%; object-fit:fill; pointer-events:none; filter:drop-shadow(0 0 8px rgba(231,177,89,.13)); }
-.card-holo-glint { position:absolute; z-index:6; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.52; background:radial-gradient(ellipse at var(--light-x,50%) var(--light-y,38%),rgba(185,235,255,.37),transparent 35%),linear-gradient(112deg,transparent 43%,rgba(123,208,239,.12) 48%,rgba(255,224,167,.18) 50%,rgba(107,196,229,.12) 53%,transparent 59%); background-size:100% 100%,220% 100%; background-position:center,-120% center; animation:card-glint 8s ease-in-out infinite; transition:opacity 350ms ease; }
+.card-holo-glint { position:absolute; z-index:3; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.38; background:radial-gradient(ellipse at var(--light-x,50%) var(--light-y,38%),rgba(185,235,255,.29),transparent 39%),linear-gradient(112deg,transparent 43%,rgba(123,208,239,.09) 48%,rgba(255,224,167,.14) 50%,rgba(107,196,229,.09) 53%,transparent 59%); background-size:100% 100%,220% 100%; background-position:center,-120% center; animation:card-glint 9s ease-in-out infinite; transition:opacity 350ms ease; }
 .deck-hint { margin-top:17px; position:relative; z-index:2; display:flex; align-items:center; gap:12px; color:#858783; font:11px Georgia,serif; letter-spacing:.2em; }
 .hint-line { width:32px; height:1px; background:#92764b; }.hint-key { color:#c7a568; font-size:16px; }
 .deck-count { position:absolute; right:clamp(24px,6vw,92px); bottom:24px; display:grid; justify-items:end; color:#7e8282; font:10px Georgia,serif; letter-spacing:.17em; }

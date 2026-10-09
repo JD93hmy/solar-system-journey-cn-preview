@@ -17,14 +17,13 @@ const facts = [
   ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
 ];
 
+const cardArt = Object.fromEntries(worlds.map((world) => [world.id, `/assets/cards/${world.id}-holo-card.png`]));
+
 function CardArtwork({ world, className = "" }) {
   return (
     <span className={`card-artwork ${className} card-art-${world.id}`} aria-hidden="true">
-      <span className="card-atmosphere" />
-      <img className={`card-planet-layer planet-layer-${world.id}`} src={world.image} alt="" />
-      <img className="card-light-layer" src="/assets/cards/card-light-overlay.png" alt="" />
-      <span className="description-layer"><b>{world.english}</b><em>{world.name}</em><small>{world.order} <i>·</i> SOLAR SYSTEM</small></span>
-      <img className="card-frame-layer" src="/assets/cards/card-ornamental-frame.png" alt="" />
+      <img className="card-composite-image" src={cardArt[world.id]} alt="" />
+      {world.id !== "saturn" && <span className="description-layer"><b>{world.english}</b><em>{world.name}</em><small>{world.order} <i>·</i> SOLAR SYSTEM</small></span>}
       <span className="card-holo-glint" />
     </span>
   );
