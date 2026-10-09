@@ -17,23 +17,15 @@ const facts = [
   ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
 ];
 
-const cardArt = {
-  sun: "/assets/cards/sun-holo-card.png",
-  mercury: "/assets/cards/mercury-holo-card.png",
-  venus: "/assets/cards/venus-holo-card.png",
-  earth: "/assets/cards/earth-holo-card.png",
-  mars: "/assets/cards/mars-holo-card.png",
-  jupiter: "/assets/cards/jupiter-holo-card.png",
-  saturn: "/assets/cards/saturn-holo-card.png",
-  uranus: "/assets/cards/uranus-holo-card.png",
-  neptune: "/assets/cards/neptune-holo-card.png",
-};
-
 function CardArtwork({ world, className = "" }) {
   return (
     <span className={`card-artwork ${className} card-art-${world.id}`} aria-hidden="true">
-      <img className="card-art-illustration" src={cardArt[world.id]} alt="" />
-      {world.id !== "saturn" && <span className="description-layer"><b>{world.english}</b><em>{world.name}</em><small>{world.order} <i>·</i> SOLAR SYSTEM</small></span>}
+      <span className="card-atmosphere" />
+      <img className={`card-planet-layer planet-layer-${world.id}`} src={world.image} alt="" />
+      <img className="card-light-layer" src="/assets/cards/card-light-overlay.png" alt="" />
+      <span className="description-layer"><b>{world.english}</b><em>{world.name}</em><small>{world.order} <i>·</i> SOLAR SYSTEM</small></span>
+      <img className="card-frame-layer" src="/assets/cards/card-ornamental-frame.png" alt="" />
+      <span className="card-holo-glint" />
     </span>
   );
 }
@@ -52,7 +44,7 @@ function PlanetCard({ world, index, onOpen }) {
           <span className="back-index">SOLAR ATLAS · {world.number}</span>
           <span className="back-caption">太阳系星图</span>
         </span>
-        <span className="card-face card-front"><CardArtwork world={world} /><span className="foil-sheen" /></span>
+        <span className="card-face card-front"><CardArtwork world={world} /></span>
       </span>
     </button>
   );
@@ -92,6 +84,9 @@ function LearningCard({ world, onClose, onMove }) {
               event.currentTarget.setPointerCapture(event.pointerId);
             }}
             onPointerMove={(event) => {
+              const bounds = event.currentTarget.getBoundingClientRect();
+              event.currentTarget.style.setProperty("--light-x", `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+              event.currentTarget.style.setProperty("--light-y", `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
               const drag = dragRef.current;
               if (drag?.pointerId === event.pointerId) {
                 const dx = event.clientX - drag.startX;
@@ -100,8 +95,7 @@ function LearningCard({ world, onClose, onMove }) {
                 setRotation({ x: Math.max(-18, Math.min(18, drag.baseX + dy * 0.32)), y: drag.baseY + dx * 0.8 });
                 return;
               }
-              const rect = event.currentTarget.getBoundingClientRect();
-              setRotation((value) => ({ ...value, x: ((event.clientY - rect.top) / rect.height - 0.5) * -8 }));
+              setRotation((value) => ({ ...value, x: ((event.clientY - bounds.top) / bounds.height - 0.5) * -8 }));
             }}
             onPointerUp={(event) => {
               if (dragRef.current?.pointerId !== event.pointerId) return;
@@ -110,7 +104,13 @@ function LearningCard({ world, onClose, onMove }) {
               setRotation((value) => ({ ...value, x: 0 }));
             }}
             onPointerCancel={() => { dragRef.current = null; movedRef.current = false; setDragging(false); setRotation((value) => ({ ...value, x: 0 })); }}
-            onPointerLeave={() => { if (!dragRef.current) setRotation((value) => ({ ...value, x: 0 })); }}
+            onPointerLeave={(event) => {
+              if (!dragRef.current) {
+                setRotation((value) => ({ ...value, x: 0 }));
+                event.currentTarget.style.setProperty("--light-x", "50%");
+                event.currentTarget.style.setProperty("--light-y", "38%");
+              }
+            }}
             onClick={() => {
               if (movedRef.current) { movedRef.current = false; return; }
               setRotation((value) => ({ x: 0, y: value.y + 180 }));
