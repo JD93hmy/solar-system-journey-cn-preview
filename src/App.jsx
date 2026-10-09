@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "@phosphor-icons/react";
 
 const worlds = [
@@ -17,15 +17,23 @@ const facts = [
   ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
 ];
 
+const cardArt = {
+  sun: "/assets/cards/sun-holo-card.png",
+  mercury: "/assets/cards/mercury-holo-card.png",
+  venus: "/assets/cards/venus-holo-card.png",
+  earth: "/assets/cards/earth-holo-card.png",
+  mars: "/assets/cards/mars-holo-card.png",
+  jupiter: "/assets/cards/jupiter-holo-card.png",
+  saturn: "/assets/cards/saturn-holo-card.png",
+  uranus: "/assets/cards/uranus-holo-card.png",
+  neptune: "/assets/cards/neptune-holo-card.png",
+};
+
 function CardArtwork({ world, className = "" }) {
   return (
     <span className={`card-artwork ${className} card-art-${world.id}`} aria-hidden="true">
-      <span className="art-background" />
-      <span className="art-star-map" />
-      <span className="planet-layer"><img src={world.image} alt="" /></span>
-      <span className="light-layer"><img src="/assets/cards/card-light-overlay.png" alt="" /></span>
-      <span className="description-layer"><small>{world.order} <i>·</i> SOLAR SYSTEM</small><b>{world.english}</b><em>{world.name}</em></span>
-      <span className="border-layer"><img src="/assets/cards/card-ornamental-frame.png" alt="" /></span>
+      <img className="card-art-illustration" src={cardArt[world.id]} alt="" />
+      {world.id !== "saturn" && <span className="description-layer"><b>{world.english}</b><em>{world.name}</em><small>{world.order} <i>·</i> SOLAR SYSTEM</small></span>}
     </span>
   );
 }
@@ -51,31 +59,67 @@ function PlanetCard({ world, index, onOpen }) {
 }
 
 function LearningCard({ world, onClose, onMove }) {
-  const [flipped, setFlipped] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef(null);
+  const movedRef = useRef(false);
   useEffect(() => {
     const closeOnEscape = (event) => { if (event.key === "Escape") onClose(); };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [onClose]);
+  useEffect(() => {
+    setRotation({ x: 0, y: 0 });
+    dragRef.current = null;
+    movedRef.current = false;
+    setDragging(false);
+  }, [world.id]);
+  const normalizedRotation = ((rotation.y % 360) + 360) % 360;
+  const showingBack = normalizedRotation > 90 && normalizedRotation < 270;
 
   return (
     <div className="learning-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className={`learning-card learn-${world.id}`} role="dialog" aria-modal="true" aria-labelledby="learning-title">
         <div className="learning-art">
           <button
-            className={`learning-card-preview${flipped ? " is-flipped" : ""}`}
-            style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg` }}
-            onClick={() => setFlipped((value) => !value)}
-            onPointerMove={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              setTilt({ x: ((event.clientY - rect.top) / rect.height - 0.5) * -12, y: ((event.clientX - rect.left) / rect.width - 0.5) * 14 });
+            className={`learning-card-preview${dragging ? " is-dragging" : ""}`}
+            style={{ "--tilt-x": `${rotation.x}deg`, "--card-turn": `${rotation.y}deg` }}
+            onPointerDown={(event) => {
+              if (event.pointerType === "mouse" && event.button !== 0) return;
+              dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, baseX: rotation.x, baseY: rotation.y };
+              movedRef.current = false;
+              setDragging(true);
+              event.currentTarget.setPointerCapture(event.pointerId);
             }}
-            onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-            aria-label={flipped ? "翻回卡牌正面" : "翻转卡牌查看背面"}
+            onPointerMove={(event) => {
+              const drag = dragRef.current;
+              if (drag?.pointerId === event.pointerId) {
+                const dx = event.clientX - drag.startX;
+                const dy = event.clientY - drag.startY;
+                if (Math.abs(dx) + Math.abs(dy) > 5) movedRef.current = true;
+                setRotation({ x: Math.max(-18, Math.min(18, drag.baseX + dy * 0.32)), y: drag.baseY + dx * 0.8 });
+                return;
+              }
+              const rect = event.currentTarget.getBoundingClientRect();
+              setRotation((value) => ({ ...value, x: ((event.clientY - rect.top) / rect.height - 0.5) * -8 }));
+            }}
+            onPointerUp={(event) => {
+              if (dragRef.current?.pointerId !== event.pointerId) return;
+              dragRef.current = null;
+              setDragging(false);
+              setRotation((value) => ({ ...value, x: 0 }));
+            }}
+            onPointerCancel={() => { dragRef.current = null; movedRef.current = false; setDragging(false); setRotation((value) => ({ ...value, x: 0 })); }}
+            onPointerLeave={() => { if (!dragRef.current) setRotation((value) => ({ ...value, x: 0 })); }}
+            onClick={() => {
+              if (movedRef.current) { movedRef.current = false; return; }
+              setRotation((value) => ({ x: 0, y: value.y + 180 }));
+            }}
+            aria-label="拖动卡片进行 360 度旋转；点击翻转卡面和卡背"
+            aria-pressed={showingBack}
           >
             <span className="learning-card-3d-inner">
-              <span className="learning-card-face learning-card-front"><CardArtwork world={world} className="learning-artwork" /></span>
+              <span className="learning-card-face learning-card-front"><CardArtwork world={world} /></span>
               <span className="learning-card-face learning-card-back"><img src="/assets/cards/saturn-card-back.png" alt="" /><span>SOLAR ATLAS · {world.number}</span><b>太阳系星图</b></span>
             </span>
           </button>
@@ -116,14 +160,11 @@ export function App() {
         <div className="scene-orbit orbit-one" /><div className="scene-orbit orbit-two" />
         <div className="scene-star star-a">✦</div><div className="scene-star star-b">✧</div><div className="scene-star star-c">✦</div>
         <div className="hero-copy">
-          <p className="hero-kicker"><span /> THE CELESTIAL COLLECTION <span /></p>
-          <h1 id="hero-title">把太阳系，<br /><em>收藏在手中。</em></h1>
-          <p>悬停翻看卡牌，点击开启一段星际探索。</p>
+          <h1 id="hero-title">认识太阳系</h1>
         </div>
         <div className="card-fan" role="group" aria-label="太阳与八颗行星卡牌">
           {worlds.map((world, index) => <PlanetCard key={world.id} world={world} index={index} onOpen={setSelected} />)}
         </div>
-        <div className="deck-hint"><span className="hint-line" /> HOVER TO REVEAL <span className="hint-key">↗</span></div>
         <div className="deck-count"><b>09</b><span> CELESTIAL BODIES</span></div>
       </section>
       <footer className="atlas-footer"><span>从太阳开始，依次认识每个世界</span><span>探索太阳系 <i>·</i> NASA FACTS</span></footer>
