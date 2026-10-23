@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "@phosphor-icons/react";
 
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
+
 const worlds = [
   ["sun", "太阳", "SUN", "恒星", "太阳系中心", "1,392,700 公里", "约 25–35 个地球日", "约 5,500°C", "约 73% 氢、25% 氦", "光到地球约 8 分 20 秒", "太阳集中了太阳系约 99.8% 的质量。它释放的光与热塑造了每颗行星的环境，也维系着地球上的生命。", "太阳每秒把约 6 亿吨氢聚变成氦。", "https://science.nasa.gov/sun/facts/"],
   ["mercury", "水星", "MERCURY", "第一颗行星", "5,800 万公里", "4,879 公里", "88 个地球日", "昼夜约 430°C 至 −180°C", "岩石外壳与巨大的金属核心", "阳光抵达约需 3.2 分钟", "水星是离太阳最近、也是最小的行星。它几乎没有大气保存热量，因此白昼炽热、黑夜严寒。", "水星的一天比它的一年还长。", "https://science.nasa.gov/mercury/facts/"],
@@ -11,13 +13,13 @@ const worlds = [
   ["saturn", "土星", "SATURN", "第六颗行星", "14 亿公里", "120,536 公里", "29.45 个地球年", "云顶约 −140°C", "氢、氦与冰尘组成的环", "拥有最壮观复杂的行星环", "土星的环由无数冰粒、岩石与尘埃组成。它本身密度极低，若有足够大的海洋，理论上甚至可以漂浮。", "土星北极有一条巨大的六边形急流。", "https://science.nasa.gov/saturn/facts/"],
   ["uranus", "天王星", "URANUS", "第七颗行星", "29 亿公里", "51,118 公里", "84 个地球年", "约 −195°C", "水、甲烷与氨构成的冰巨星", "几乎横躺着绕太阳运行", "天王星淡青色来自大气中的甲烷。一次远古碰撞可能让它的自转轴倾斜到近乎躺倒。", "它的一个季节可持续约 21 个地球年。", "https://science.nasa.gov/uranus/facts/"],
   ["neptune", "海王星", "NEPTUNE", "第八颗行星", "45 亿公里", "49,528 公里", "164.8 个地球年", "约 −200°C", "富含水、甲烷与氨的冰巨星", "太阳系风速最快的世界", "在太阳系已知行星的最外侧，海王星依然拥有活跃而猛烈的天气。深蓝云层中，风速可超过每小时 2,000 公里。", "自 1846 年被发现后，海王星只完成过一次公转。", "https://science.nasa.gov/neptune/facts/"],
-].map(([id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source], index) => ({ id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source, image: `/assets/planets/${id}.png`, number: String(index + 1).padStart(2, "0") }));
+].map(([id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source], index) => ({ id, name, english, order, distance, diameter, year, temperature, composition, light, intro, fact, source, image: assetUrl(`assets/planets/${id}.png`), number: String(index + 1).padStart(2, "0") }));
 
 const facts = [
   ["距太阳", "distance"], ["直径", "diameter"], ["公转周期", "year"], ["温度", "temperature"],
 ];
 
-const cardArt = Object.fromEntries(worlds.map((world) => [world.id, `/assets/cards/${world.id}-holo-card.png`]));
+const cardArt = Object.fromEntries(worlds.map((world) => [world.id, assetUrl(`assets/cards/${world.id}-holo-card.png`)]));
 
 function CardArtwork({ world, className = "" }) {
   return (
@@ -39,7 +41,7 @@ function PlanetCard({ world, index, onOpen }) {
     >
       <span className="card-inner">
         <span className="card-face card-back" aria-hidden="true">
-          <img src="/assets/cards/saturn-card-back.png" alt="" />
+          <img src={assetUrl("assets/cards/saturn-card-back.png")} alt="" />
           <span className="back-index">SOLAR ATLAS · {world.number}</span>
           <span className="back-caption">太阳系星图</span>
         </span>
@@ -140,7 +142,7 @@ function LearningCard({ world, onClose, onMove }) {
           >
             <span className="learning-card-3d-inner">
               <span className="learning-card-face learning-card-front"><CardArtwork world={world} /></span>
-              <span className="learning-card-face learning-card-back"><img src="/assets/cards/saturn-card-back.png" alt="" /><span>SOLAR ATLAS · {world.number}</span><b>太阳系星图</b></span>
+              <span className="learning-card-face learning-card-back"><img src={assetUrl("assets/cards/saturn-card-back.png")} alt="" /><span>SOLAR ATLAS · {world.number}</span><b>太阳系星图</b></span>
             </span>
           </button>
           <span className="learning-art-count">{world.number} / 09</span>
