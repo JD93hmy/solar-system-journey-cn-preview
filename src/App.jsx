@@ -52,6 +52,7 @@ function PlanetCard({ world, index, onOpen }) {
 function LearningCard({ world, onClose, onMove }) {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [idleMotion, setIdleMotion] = useState({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1 });
   const dragRef = useRef(null);
   const movedRef = useRef(false);
   useEffect(() => {
@@ -64,7 +65,28 @@ function LearningCard({ world, onClose, onMove }) {
     dragRef.current = null;
     movedRef.current = false;
     setDragging(false);
+    setIdleMotion({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1 });
   }, [world.id]);
+  useEffect(() => {
+    if (dragging) return undefined;
+    let timer;
+    let cancelled = false;
+    const drift = () => {
+      if (cancelled) return;
+      setIdleMotion({
+        x: (Math.random() - 0.5) * 18,
+        y: (Math.random() - 0.5) * 18,
+        z: (Math.random() - 0.5) * 34,
+        rx: (Math.random() - 0.5) * 11,
+        ry: (Math.random() - 0.5) * 15,
+        rz: (Math.random() - 0.5) * 4,
+        scale: 0.975 + Math.random() * 0.05,
+      });
+      timer = window.setTimeout(drift, 1700 + Math.random() * 1700);
+    };
+    timer = window.setTimeout(drift, 450);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [dragging, world.id]);
   const normalizedRotation = ((rotation.y % 360) + 360) % 360;
   const showingBack = normalizedRotation > 90 && normalizedRotation < 270;
 
@@ -74,11 +96,12 @@ function LearningCard({ world, onClose, onMove }) {
         <div className="learning-art">
           <button
             className={`learning-card-preview${dragging ? " is-dragging" : ""}`}
-            style={{ "--tilt-x": `${rotation.x}deg`, "--card-turn": `${rotation.y}deg` }}
+            style={{ "--tilt-x": `${rotation.x}deg`, "--card-turn": `${rotation.y}deg`, "--drift-x": `${idleMotion.x}px`, "--drift-y": `${idleMotion.y}px`, "--drift-z": `${idleMotion.z}px`, "--drift-rx": `${idleMotion.rx}deg`, "--drift-ry": `${idleMotion.ry}deg`, "--drift-rz": `${idleMotion.rz}deg`, "--drift-scale": idleMotion.scale }}
             onPointerDown={(event) => {
               if (event.pointerType === "mouse" && event.button !== 0) return;
               dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, baseX: rotation.x, baseY: rotation.y };
               movedRef.current = false;
+              setIdleMotion({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1 });
               setDragging(true);
               event.currentTarget.setPointerCapture(event.pointerId);
             }}
@@ -91,18 +114,16 @@ function LearningCard({ world, onClose, onMove }) {
                 const dx = event.clientX - drag.startX;
                 const dy = event.clientY - drag.startY;
                 if (Math.abs(dx) + Math.abs(dy) > 5) movedRef.current = true;
-                setRotation({ x: Math.max(-18, Math.min(18, drag.baseX + dy * 0.32)), y: drag.baseY + dx * 0.8 });
-                return;
+                setRotation({ x: Math.max(-32, Math.min(32, drag.baseX - dy * 0.62)), y: drag.baseY + dx * 0.95 });
               }
-              setRotation((value) => ({ ...value, x: ((event.clientY - bounds.top) / bounds.height - 0.5) * -8 }));
             }}
             onPointerUp={(event) => {
               if (dragRef.current?.pointerId !== event.pointerId) return;
               dragRef.current = null;
               setDragging(false);
-              setRotation((value) => ({ ...value, x: 0 }));
+              setRotation({ x: 0, y: 0 });
             }}
-            onPointerCancel={() => { dragRef.current = null; movedRef.current = false; setDragging(false); setRotation((value) => ({ ...value, x: 0 })); }}
+            onPointerCancel={() => { dragRef.current = null; movedRef.current = false; setDragging(false); setRotation({ x: 0, y: 0 }); }}
             onPointerLeave={(event) => {
               if (!dragRef.current) {
                 setRotation((value) => ({ ...value, x: 0 }));
@@ -114,7 +135,7 @@ function LearningCard({ world, onClose, onMove }) {
               if (movedRef.current) { movedRef.current = false; return; }
               setRotation((value) => ({ x: 0, y: value.y + 180 }));
             }}
-            aria-label="拖动卡片进行 360 度旋转；点击翻转卡面和卡背"
+            aria-label="按住并拖动卡片，沿鼠标轨迹旋转观察；松手后两秒回到正面，点击可翻转卡背"
             aria-pressed={showingBack}
           >
             <span className="learning-card-3d-inner">
